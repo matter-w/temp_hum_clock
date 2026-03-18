@@ -1,0 +1,13 @@
+temp_clock\croutine.o: freertos\source\croutine.c
+temp_clock\croutine.o: ./freertos/include/FreeRTOS.h
+temp_clock\croutine.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stddef.h
+temp_clock\croutine.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stdint.h
+temp_clock\croutine.o: ./freertos/FreeRTOSConfig.h
+temp_clock\croutine.o: ./freertos/include/projdefs.h
+temp_clock\croutine.o: ./freertos/include/portable.h
+temp_clock\croutine.o: ./freertos/include/deprecated_definitions.h
+temp_clock\croutine.o: ./freertos/portable/portmacro.h
+temp_clock\croutine.o: ./freertos/include/mpu_wrappers.h
+temp_clock\croutine.o: ./freertos/include/task.h
+temp_clock\croutine.o: ./freertos/include/list.h
+temp_clock\croutine.o: ./freertos/include/croutine.h

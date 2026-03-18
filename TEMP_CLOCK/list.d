@@ -1,0 +1,12 @@
+temp_clock\list.o: freertos\source\list.c
+temp_clock\list.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stdlib.h
+temp_clock\list.o: ./freertos/include/FreeRTOS.h
+temp_clock\list.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stddef.h
+temp_clock\list.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stdint.h
+temp_clock\list.o: ./freertos/FreeRTOSConfig.h
+temp_clock\list.o: ./freertos/include/projdefs.h
+temp_clock\list.o: ./freertos/include/portable.h
+temp_clock\list.o: ./freertos/include/deprecated_definitions.h
+temp_clock\list.o: ./freertos/portable/portmacro.h
+temp_clock\list.o: ./freertos/include/mpu_wrappers.h
+temp_clock\list.o: ./freertos/include/list.h

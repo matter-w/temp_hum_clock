@@ -1,0 +1,14 @@
+temp_clock\stream_buffer.o: freertos\source\stream_buffer.c
+temp_clock\stream_buffer.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\string.h
+temp_clock\stream_buffer.o: ./freertos/include/FreeRTOS.h
+temp_clock\stream_buffer.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stddef.h
+temp_clock\stream_buffer.o: D:\keil5\keil\ARM\ARMCC\Bin\..\include\stdint.h
+temp_clock\stream_buffer.o: ./freertos/FreeRTOSConfig.h
+temp_clock\stream_buffer.o: ./freertos/include/projdefs.h
+temp_clock\stream_buffer.o: ./freertos/include/portable.h
+temp_clock\stream_buffer.o: ./freertos/include/deprecated_definitions.h
+temp_clock\stream_buffer.o: ./freertos/portable/portmacro.h
+temp_clock\stream_buffer.o: ./freertos/include/mpu_wrappers.h
+temp_clock\stream_buffer.o: ./freertos/include/task.h
+temp_clock\stream_buffer.o: ./freertos/include/list.h
+temp_clock\stream_buffer.o: ./freertos/include/stream_buffer.h
