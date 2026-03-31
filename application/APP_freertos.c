@@ -1,5 +1,5 @@
 #include "APP_freertos.h"
-
+#include "task.h"
 //任务task_collect相关配置
 #define task_collect_PRIORITY 1         //优先级
 #define task_collect_STACK_SIZE 128     //堆栈大小
@@ -29,6 +29,14 @@ TaskHandle_t task_alarm_Handle=NULL;   //任务句柄
 #define task_volume_STACK_SIZE 128
 void task_volume(void* pvParmeters);
 TaskHandle_t task_volume_Handle=NULL;   //任务句柄
+
+
+//任务task_debug相关配置
+#define task_debug_PRIORITY 4
+#define task_debug_STACK_SIZE 128
+void task_debug(void* pvParmeters);
+TaskHandle_t task_debug_Handle=NULL;   //任务句柄
+
 
 
 //闹钟信息存储变量
@@ -64,6 +72,7 @@ uint8_t led_en=1;
 
 void APP_FREERTOS_Start(void)
 {
+    
     //获取时间和温湿度任务
     xTaskCreate(task_collect, "task_collect", task_collect_STACK_SIZE, 
     NULL, task_collect_PRIORITY, &task_collect_Handle);
@@ -84,6 +93,9 @@ void APP_FREERTOS_Start(void)
     xTaskCreate(task_volume,"task_volume",task_volume_STACK_SIZE,
     NULL,task_volume_PRIORITY,&task_volume_Handle);
 
+//测试任务
+    xTaskCreate(task_debug,"task_debug",task_debug_STACK_SIZE,
+    NULL,task_debug_PRIORITY,&task_debug_Handle);
     //vTaskStartScheduler()函数会启动调度器，开始执行任务。它会一直运行，直到系统关闭或发生错误。
     vTaskStartScheduler();
 }
@@ -116,6 +128,7 @@ void  task_collect(void* pvParameters)
 //task_show任务函数实现
 void  task_show(void* pvParameters)
 {
+  
     APP_show_start();
     while(1)
     {
@@ -136,8 +149,9 @@ void  task_show(void* pvParameters)
         else{
             Inf_led_stop();
         }
-        
+         
     }
+
 }
 
 //task_switch任务函数实现
@@ -277,8 +291,9 @@ void task_alarm(void* pvParmeters)
             }
 
         }
-        vTaskDelay(1000);
+      
        }
+         vTaskDelay(1000);
         }
       
     }
@@ -342,5 +357,31 @@ void task_volume(void* pvParmeters)
 
 }
 
-
+void task_debug(void* pvParmeters)
+{
+    Key_type_value test=0;
+    while(1)
+    {
+        test= init_get_key_value();
+        if(test==KEY_NONE)
+        debug_printf("1");
+        if(test==KEY_TIME_SET)
+        debug_printf("2");
+        if(test==KEY_TIME_SET_LONG)
+        debug_printf("3");
+        if(test==KEY_ALARM_SET)
+        debug_printf("4");
+        if(test==KEY_ALARM_SET_LONG)
+        debug_printf("5");
+        if(test==KEY_UP)
+        debug_printf("6");
+        if(test==KEY_DOWN)
+        debug_printf("7");
+        if(test==KEY_ALARM_EN)
+        debug_printf("8");
+        if(test==KEY_ALARM_5)
+        debug_printf("9");
+        vTaskDelay(1000);
+    }
+}
 

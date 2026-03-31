@@ -107,105 +107,141 @@ void Inf_led_set_clock(uint8_t h, uint8_t m,uint8_t clock_flag)
     vTaskDelay(5);
 }
 
-void Inf_led_set_all(uint8_t h,int8_t m,int8_t temperatu,int8_t humidity,
-    uint8_t clock_flag,show_type_struct* show_type)
+void Inf_led_set_all(uint8_t h, uint8_t m, int8_t temperature,
+     int8_t humidity, uint8_t clock_flag, show_type_struct *show_type)
 {
-    // 一次性写入32位数据 => 先写高16位 => 先写right的数据
-    // 拼接VCCP00导电时候的  32data值
-    // 湿度值=> 添加对应的单位符号0x4000
-    uint32_t vccp02=0x38;
-    //拼接vccp00的数据
-    //湿度值
-    uint16_t data_right=led_hu_s[humidity/10]+led_hu_g[humidity%10]+0x4000;
-    //添加am/pm的灯
-    uint16_t am_pm_data=0;
-    if(show_type->is_12_hour)
-    {
-        if(show_type->is_pm)
-        {
-            am_pm_data=0x8000;
-        }
-        else{
-            am_pm_data=0x4000;
-        }
-    }
-    uint16_t data_left=0;
-    if(clock_flag)
-    {
-        data_left = led_clk_h_s[h/10] + led_clk_h_g[h%10]+am_pm_data+0x20;
-    }
-    else
-    {
-        data_left = led_clk_h_s[h/10]+led_clk_h_g[h%10];
-    }
-    //五天闹钟标识
-    if(show_type->is_alarm_five_day)
-    {
-        data_right+=0x8000;
-    }
+     uint32_t vccp02_data = 0x38;
 
-    //一次写入32位数据
-    Inf_led_write(0,1,1,(data_right<<16)|data_left);
-    vTaskDelay(5-touch_count);
+  // 一次性写入32位数据 => 先写高16位 => 先写right的数据
+  // 1. 拼接VCCP00导电时候的  32data值
+  // 1.1 湿度值=> 添加对应的单位符号0x4000
+  uint16_t data_right = led_hu_s[humidity / 10] + led_hu_g[humidity % 10] + 0x4000;
+  uint16_t am_pm_data = 0;
+  // 1.2 添加AM/PM的灯
+  if (show_type->is_12_hour)
+  {
+      if (show_type->is_pm)
+      {
+          am_pm_data = 0x8000;
+      }
+      else
+      {
+          am_pm_data = 0x4000;
+      }
+  }
 
+  // 1.3 时钟的小时 添加对应的点
+  uint16_t data_left = 0;
+  if (clock_flag)
+  {
+      // 添加逻辑 h > 99 表示不展示
+      if (h > 99)
+      {
+          data_left = am_pm_data + 0x20;
+      }
+      else
+      {
+          data_left = led_clk_h_s[h / 10] + led_clk_h_g[h % 10] + am_pm_data + 0x20;
+      }
+  }
+  else
+  {
+      if (h > 99)
+      {
+          data_left = am_pm_data;
+      }
+      else
+      {
+          data_left = led_clk_h_s[h / 10] + led_clk_h_g[h % 10] + am_pm_data;
+      }
+  }
 
-      //修正温度的值
-   int8_t temp=temperatu;
-  
-    uint16_t temp_data=0;
-    if(show_type->is_celsius)
-    {
-        temp_data=0x4000;
-    }else{
-        temp_data=0x8000;
-        temp=(int8_t)((temperatu*9/5)+32);
-    }
+  // 1.4 5天闹钟标识
+  if (show_type->is_alarm_five_day)
+  {
+      data_right += 0x8000;
+  }
 
-    //拼接vccp01的数据
-    if(temp<0)
-    {
-        temp=-temp;
-        vccp02+=0x02;
+  // 一次写入32位数据 => 两边都会亮
+  Inf_led_write(0, 1, 1, (data_right << 16) | data_left);
+  vTaskDelay(5 - touch_count);
 
-    }
-    if(temp>99)
-    {
-        temp-=100;
-        vccp02+=0x05;
-    }
-    data_right=led_temp_s[temp/10]+led_temp_g[temp%10]+temp_data;
-    data_left=led_clk_m_s[m/10]+led_clk_m_g[m%10];
+  // 2. 拼接VCCP01导电时候的  32data值
+  // 2.0 区分摄氏度和华氏度
 
-    // 添加闹钟标识
-    uint16_t alarm_data=0;
-    if(show_type->is_alarm_1)
-    {
-        alarm_data+=0x4000;
-    }
-    if(show_type->is_alarm_2)
-    {
-        alarm_data+=0x8000;
-    }
+  // 默认就是摄氏度
+  // 修正温度的值
+  int8_t temp_now = temperature;
+  uint16_t temperature_data = 0;
+  if (show_type->is_celsius)
+  {
+      temperature_data = 0x4000;
+  }
+  else
+  {
+      temperature_data = 0x8000;
+      // 计算为华氏度
+      temp_now = (temperature * 9 / 5) + 32;
+  }
 
-    data_left+=alarm_data;
-    HAL_GPIO_WritePin(VCC_P00_GPIO_Port,VCC_P00_Pin,GPIO_PIN_SET);
-    vTaskDelay(touch_count);
-    //一次写入32位数据
-    Inf_led_write(1, 0, 1, (data_right<<16)|data_left);
-    vTaskDelay(5-touch_count);
-    HAL_GPIO_WritePin(VCC_P01_GPIO_Port,VCC_P01_Pin,GPIO_PIN_SET);
-    vTaskDelay(touch_count);
-    //vccp02
-    Inf_led_write(1,1,0,(vccp02<<16));
-    vTaskDelay(5-touch_count);
-    HAL_GPIO_WritePin(VCC_P02_GPIO_Port,VCC_P02_Pin,GPIO_PIN_SET);
-    vTaskDelay(touch_count);
+  // 2.1 拼接温度 => 添加对应的摄氏度符号
+  // 只保留数据的十位和个位  并且是整数
+  if (temp_now < 0)
+  {
+      temp_now = -temp_now;
+      // 需要点亮符号
+      vccp02_data += 0x02;
+  }
+  if (temp_now > 99)
+  {
+      temp_now -= 100;
+      // 点亮百位
+      vccp02_data += 0x05;
+  }
 
-    //特殊灯-》充电标识
-    if(show_type->is_charging)
-    {
-        HAL_GPIO_WritePin(P03_GPIO_Port,P03_Pin,GPIO_PIN_RESET);
-    }
+  data_right = led_temp_s[temp_now / 10] + led_temp_g[temp_now % 10] + temperature_data;
+
+  // 2.2 拼接分钟
+  if (m > 99)
+  {
+      data_left = 0;
+  }
+  else
+  {
+      data_left = led_clk_m_s[m / 10] + led_clk_m_g[m % 10];
+  }
+
+  // 2.3 添加闹钟标识
+  uint16_t alarm_data = 0;
+  if (show_type->is_alarm_1)
+  {
+      alarm_data += 0x4000;
+  }
+  if (show_type->is_alarm_2)
+  {
+      alarm_data += 0x8000;
+  }
+  data_left += alarm_data;
+  // 不亮touch_count时间 => 关闭掉VCCP00
+  HAL_GPIO_WritePin(VCC_P00_GPIO_Port, VCC_P00_Pin, GPIO_PIN_SET);
+  vTaskDelay(touch_count);
+  // 一次性写入32位数据 => 两边都会亮
+  Inf_led_write(1, 0, 1, (data_right << 16) | data_left);
+  vTaskDelay(5 - touch_count);
+  HAL_GPIO_WritePin(VCC_P01_GPIO_Port, VCC_P01_Pin, GPIO_PIN_SET);
+  vTaskDelay(touch_count);
+  // 3. VCCP02供电时电亮的灯
+  Inf_led_write(1, 1, 0, (vccp02_data << 16));
+  vTaskDelay(5 - touch_count);
+  // 关闭VCCP02一段时间
+  HAL_GPIO_WritePin(VCC_P02_GPIO_Port, VCC_P02_Pin, GPIO_PIN_SET);
+  vTaskDelay(touch_count);
+  // 特殊灯 充电标识
+  if (show_type->is_charging)
+  {
+      // 拉低P03
+      HAL_GPIO_WritePin(P03_GPIO_Port, P03_Pin, GPIO_PIN_RESET);
+  }
 }
 
 /**

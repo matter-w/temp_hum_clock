@@ -10,11 +10,11 @@ extern show_alarm_set alarm_set;
 extern show_time_set time_set;
 
 /**
- * @brief 初始化/开启led显示
+ * @brief 初�?�化/开启led显示
  */
 void APP_show_start(void)
 {
-    Inf_led_start(); //开启总开关
+    Inf_led_start(); //开�?总开�?
     clock_last_time = xTaskGetTickCount(); //记录当前时间
 } 
 
@@ -24,12 +24,12 @@ void APP_show_start(void)
 void APP_show_normal(Clock_Date_time_type *datetime,int8_t temperature,
     int8_t humidity,show_type_struct* show_type)
 {
-    if(xTaskGetTickCount() - clock_last_time >= 500) //每隔500ms切换一次时钟闪烁状态
+    if(xTaskGetTickCount() - clock_last_time >= 500) //每隔500ms切换一次时钟闪烁状�?
     {
-        clock_flag = !clock_flag; //切换时钟闪烁状态
-        clock_last_time = xTaskGetTickCount(); //更新上次切换时间
+        clock_flag = !clock_flag; //切换时钟�?烁状�?
+        clock_last_time = xTaskGetTickCount(); //更新上�?�切换时�?
     }
-    //修正小时的值
+    //�?正小时的�?
     uint8_t hour=0;
    if(datetime->is_12h_format&&datetime->is_pm)
    {
@@ -60,30 +60,73 @@ void APP_show_normal(Clock_Date_time_type *datetime,int8_t temperature,
 /**
  * @brief 时间设置模式
  */    
-void APP_show_time_set(Clock_Date_time_type *datetime,int8_t temperature,
+void APP_show_time_set(Clock_Date_time_type *clock_date_time,int8_t temperature,
     int8_t humidity,show_type_struct* show_type)
 {
-  //判断当前处于的页面
+     if(xTaskGetTickCount() - clock_last_time >= 500) 
+    {
+        clock_flag = !clock_flag; 
+        clock_last_time = xTaskGetTickCount(); 
+    }
+
   switch (time_set)
   {
     case time_set_year:
-    Inf_led_time_set(time_set_year,datetime->year);
+    if (clock_flag)
+        {
+            // 亮
+            Inf_led_set_all(clock_date_time->year / 100, clock_date_time->year % 100, 0, temperature, humidity, show_type);
+        }
+        else
+        {
+            // 后两个年份的数字不亮
+            Inf_led_set_all(clock_date_time->year / 100, 0xff, 0, temperature, humidity, show_type);
+        }
     break;
 
     case time_set_month:
-    Inf_led_time_set(time_set_month,datetime->month);
+    if (clock_flag)
+        {
+            // 亮
+            Inf_led_set_all(clock_date_time->month, 0xff, 0, temperature, humidity, show_type);
+        }
+        else
+        {
+            Inf_led_set_all(0xff, 0xff, 0, temperature, humidity, show_type);
+        }
     break;
 
     case time_set_day:
-    Inf_led_time_set(time_set_day,datetime->date);
+    if (clock_flag)
+        {
+            Inf_led_set_all(0xff, clock_date_time->date, 0, temperature, humidity, show_type);
+        }
+        else
+        {
+            Inf_led_set_all(0xff, 0xff, 0, temperature, humidity, show_type);
+        }
     break;
 
     case time_set_hour:
-    Inf_led_time_set(time_set_hour,datetime->hour);
+     if (clock_flag)
+        {
+            Inf_led_set_all(clock_date_time->hour, 0xff, 1, temperature, humidity, show_type);
+        }
+        else
+        {
+            Inf_led_set_all(0xff, 0xff, 1, temperature, humidity, show_type);
+        }
     break;
 
     case time_set_minute:
-    Inf_led_time_set(time_set_minute,datetime->minute);
+     if (clock_flag)
+        {
+            Inf_led_set_all(0xff, clock_date_time->minute, 1, temperature, humidity, show_type);
+        }
+        else
+        {
+            Inf_led_set_all(0xff, 0xff, 1, temperature, humidity, show_type);
+        }
     break;
   
   default:
@@ -97,10 +140,10 @@ void APP_show_time_set(Clock_Date_time_type *datetime,int8_t temperature,
 void APP_show_alarm_set(Clock_Date_time_type *datetime,int8_t temperature,
     int8_t humidity,show_type_struct* show_type)
 {
-       if(xTaskGetTickCount() - clock_last_time >= 500) //每隔500ms切换一次时钟闪烁状态
+       if(xTaskGetTickCount() - clock_last_time >= 500) //每隔500ms切换一次时钟闪烁状�?
     {
-        clock_flag = !clock_flag; //切换时钟闪烁状态
-        clock_last_time = xTaskGetTickCount(); //更新上次切换时间
+        clock_flag = !clock_flag; //切换时钟�?烁状�?
+        clock_last_time = xTaskGetTickCount(); //更新上�?�切换时�?
     }
     switch(alarm_set)
     {

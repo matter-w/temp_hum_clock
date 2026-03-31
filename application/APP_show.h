@@ -63,7 +63,7 @@ void APP_show_normal(Clock_Date_time_type *datetime,int8_t temperature,
 /**
  * @brief 时间设置模式
  */    
-void APP_show_time_set(Clock_Date_time_type *datetime,int8_t temperature,int8_t humidity,
+void APP_show_time_set(Clock_Date_time_type *clock_date_time,int8_t temperature,int8_t humidity,
     show_type_struct* show_type);
 
 /**
